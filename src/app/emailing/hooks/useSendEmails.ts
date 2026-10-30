@@ -49,10 +49,11 @@ export function useSendEmails(emails: EmailRecipient[]): UseSendEmailsResult {
       }
 
       setFiles(result.message || 'Correos enviados con éxito.');
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const reason = err instanceof Error ? err.message : 'Error de conexión al enviar correos';
       setErrorSending({
         failedEmails: [],
-        reason: err?.message || 'Error de conexión al enviar correos',
+        reason,
       });
     } finally {
       setIsLoading(false);

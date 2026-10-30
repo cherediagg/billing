@@ -45,9 +45,10 @@ export function useSaveToFile(companies: Client[]): UseSaveToFileResult {
       setSuccessMsg('Archivo guardado exitosamente.');
       setErrorMsg('');
       return true;
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Hubo un error al guardar los datos.';
       setSuccessMsg('');
-      setErrorMsg(e?.message || 'Hubo un error al guardar los datos.');
+      setErrorMsg(message);
       return false;
     } finally {
       setIsSaving(false);

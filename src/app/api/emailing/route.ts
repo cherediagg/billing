@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const emailsToSend = await EmailService.getPendingEmails();
     return NextResponse.json(emailsToSend);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error en GET /api/emailing:', err);
     return NextResponse.json(
       { error: 'Error al obtener la lista de correos pendientes.' },
@@ -42,10 +42,11 @@ export async function POST(req: Request) {
     return NextResponse.json({
       message: result.message || `${emails.length} emails enviados correctamente`,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Error interno al procesar el envío de correos.';
     console.error('Error en POST /api/emailing:', err);
     return NextResponse.json(
-      { error: err?.message || 'Error interno al procesar el envío de correos.' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

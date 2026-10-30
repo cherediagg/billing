@@ -40,9 +40,10 @@ export function useUpdatePrices(): UseUpdatePricesResult {
       setSuccessMsg('Precios actualizados y guardados exitosamente.');
       setErrorMsg('');
       return true;
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Hubo un error al guardar los nuevos precios.';
       setSuccessMsg('');
-      setErrorMsg(e?.message || 'Hubo un error al guardar los nuevos precios.');
+      setErrorMsg(message);
       return false;
     } finally {
       setIsUpdating(false);
