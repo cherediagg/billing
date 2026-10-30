@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const clients = await ClientService.getClients();
     return NextResponse.json(clients);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error en GET /api/config:', err);
     return NextResponse.json(
       { error: 'Error al obtener la lista de clientes' },
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
     await ClientService.saveClients(content as Client[]);
     return NextResponse.json({ message: 'Todo guardado correctamente' });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error en POST /api/config:', err);
     return NextResponse.json(
       { error: 'Error al guardar la configuración de clientes.' },

@@ -10,10 +10,11 @@ export async function GET() {
     }
 
     return NextResponse.json(summary);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Error interno al obtener datos de facturación';
     console.error('Error en GET /api/billing:', err);
     return NextResponse.json(
-      { error: err?.message || 'Error interno al obtener datos de facturación' },
+      { error: errorMessage },
       { status: 500 }
     );
   }
@@ -35,10 +36,11 @@ export async function POST(req: Request) {
     await ExcelService.createSummary(data);
 
     return NextResponse.json(data);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Error al generar las facturas y el resumen.';
     console.error('Error en POST /api/billing:', err);
     return NextResponse.json(
-      { error: err?.message || 'Error al generar las facturas y el resumen.' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

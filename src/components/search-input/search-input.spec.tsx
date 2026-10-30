@@ -4,7 +4,7 @@ import SearchInput from './search-input';
 
 describe('SearchInput', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<SearchInput />);
+    const { baseElement } = render(<SearchInput onSearch={jest.fn()} />);
     expect(baseElement).toBeTruthy();
   });
 });

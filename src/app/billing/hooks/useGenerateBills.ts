@@ -40,8 +40,9 @@ export function useGenerateBills(billNumber: number): UseGenerateBillsResult {
       }
 
       setFiles(result);
-    } catch (err: any) {
-      setError(err?.message || 'Error desconocido al procesar');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido al procesar';
+      setError(message);
     } finally {
       setIsLoading(false);
     }

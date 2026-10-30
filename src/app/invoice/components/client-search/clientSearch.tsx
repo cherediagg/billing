@@ -11,8 +11,10 @@ export interface ClientSearchProps {
   selectedClient?: Client | null;
 }
 
+const EMPTY_CLIENTS: Client[] = [];
+
 export function ClientSearch({
-  clients = [],
+  clients = EMPTY_CLIENTS,
   onSelectClient,
   selectedClient,
 }: ClientSearchProps) {
@@ -38,7 +40,7 @@ export function ClientSearch({
       setFilteredClients(filtered);
       setIsOpen(filtered.length > 0 && searchTerm !== selectedClient?.name);
     } else {
-      setFilteredClients([]);
+      setFilteredClients((prev) => (prev.length > 0 ? [] : prev));
       setIsOpen(false);
     }
   }, [searchTerm, clients, selectedClient?.name]);
