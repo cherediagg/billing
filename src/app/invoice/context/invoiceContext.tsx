@@ -3,12 +3,9 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useGetConfig } from '../../config/hooks/useGetConfig';
 import { Client, Service } from 'src/models';
+import { calculateInvoiceTotals, InvoiceTotals } from 'src/lib/calculations';
 
-export interface InvoiceTotals {
-  baseImponible: number;
-  iva: number;
-  total: number;
-}
+export type { InvoiceTotals };
 
 export interface InvoiceContextType {
   clients: Client[];
@@ -51,22 +48,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [clients, selectedClient]);
 
   const totals = useMemo<InvoiceTotals>(() => {
-    const baseImponible = items.reduce((sum, item) => {
-      const quantity =
-        typeof item.quantity === 'number' ? item.quantity : parseFloat(String(item.quantity)) || 0;
-      const price =
-        typeof item.price === 'number' ? item.price : parseFloat(String(item.price)) || 0;
-      return sum + quantity * price;
-    }, 0);
-
-    const iva = baseImponible * 0.21;
-    const total = baseImponible + iva;
-
-    return {
-      baseImponible: parseFloat(baseImponible.toFixed(2)),
-      iva: parseFloat(iva.toFixed(2)),
-      total: parseFloat(total.toFixed(2)),
-    };
+    return calculateInvoiceTotals(items);
   }, [items]);
 
   const handleItemChange = useCallback(
@@ -103,14 +85,14 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const setSelectedClient = useCallback((client: Client) => {
     setSelectedClientState(client);
-    setItems(
-      client.servicios && client.servicios.length > 0
-        ? [...client.servicios]
-        : [{ id: String(Date.now()), concept: 'Servicio de limpieza', quantity: 1, price: 0 }]
-    );
+    if (client.servicios && client.servicios.length > 0) {
+      setItems([...client.servicios]);
+    } else {
+      setItems([{ id: String(Date.now()), concept: 'Servicio de limpieza', quantity: 1, price: 224 }]);
+    }
   }, []);
 
-  const contextValue = useMemo(
+  const value = useMemo(
     () => ({
       clients,
       loading,
@@ -124,19 +106,8 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       addItem,
       removeItem,
     }),
-    [
-      clients,
-      loading,
-      error,
-      selectedClient,
-      items,
-      totals,
-      setSelectedClient,
-      handleItemChange,
-      addItem,
-      removeItem,
-    ]
+    [clients, loading, error, selectedClient, items, totals, setSelectedClient, handleItemChange, addItem, removeItem]
   );
 
-  return <InvoiceContext.Provider value={contextValue}>{children}</InvoiceContext.Provider>;
+  return <InvoiceContext.Provider value={value}>{children}</InvoiceContext.Provider>;
 };

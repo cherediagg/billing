@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { ClientService } from '../../../services';
+import { defaultClientRepository } from '../../../services';
 import { Client } from '../../../models';
 
 export async function GET() {
   try {
-    const clients = await ClientService.getClients();
+    const clients = await defaultClientRepository.getClients();
     return NextResponse.json(clients);
   } catch (err: unknown) {
     console.error('Error en GET /api/ipc:', err);
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       );
     }
 
-    await ClientService.saveClients(content as Client[]);
+    await defaultClientRepository.saveClients(content as Client[]);
     return NextResponse.json({ message: 'Precios de IPC guardados correctamente' });
   } catch (err: unknown) {
     console.error('Error en POST /api/ipc:', err);

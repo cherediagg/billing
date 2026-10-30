@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { EmailService } from '../../../services';
+import { defaultEmailService } from '../../../services';
 import { EmailRecipient } from '../../../models';
 
 export async function GET() {
   try {
-    const emailsToSend = await EmailService.getPendingEmails();
+    const emailsToSend = await defaultEmailService.getPendingEmails();
     return NextResponse.json(emailsToSend);
   } catch (err: unknown) {
     console.error('Error en GET /api/emailing:', err);
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const result = await EmailService.sendInvoices(emails);
+    const result = await defaultEmailService.sendInvoices(emails);
 
     if (result.failedEmails && result.failedEmails.length > 0) {
       return NextResponse.json(

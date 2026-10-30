@@ -23,16 +23,12 @@ export default function Page() {
   }, [files]);
 
   const handleCheckboxChange = (email: Emails, checked: boolean) => {
-    const updatedEmails = [...emailsToSend];
-    if (checked) {
-      updatedEmails.push(email);
-    } else {
-      const index = updatedEmails.findIndex((e) => e.file === email.file);
-      if (index !== -1) {
-        updatedEmails.splice(index, 1);
+    setEmailsToSend((prev) => {
+      if (checked) {
+        return [...prev, email];
       }
-    }
-    setEmailsToSend(updatedEmails);
+      return prev.filter((e) => e.file !== email.file);
+    });
   };
 
   const renderPreResult = data && (
@@ -82,9 +78,9 @@ export default function Page() {
         <p>{errorSending?.reason}</p>
         <div className="error-failed-emails">
           Han fallado los siguientes emails:
-          {errorSending?.failedEmails.map((file, index) => (
-            <div key={index} className="failed-email">
-              {file.file} - {file.email}
+          {errorSending?.failedEmails.map((failedItem) => (
+            <div key={`${failedItem.file}-${failedItem.email}`} className="failed-email">
+              {failedItem.file} - {failedItem.email}
             </div>
           ))}
         </div>

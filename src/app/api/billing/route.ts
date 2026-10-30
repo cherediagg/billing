@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PdfService, ExcelService } from '../../../services';
+import { defaultPdfService, defaultExcelService } from '../../../services';
 
 export async function GET() {
   try {
-    const { summary, error } = PdfService.getBillingSummary();
+    const { summary, error } = defaultPdfService.getBillingSummary();
 
     if (error || !summary) {
       return NextResponse.json({ error: error || 'No se encontraron facturas' }, { status: 404 });
@@ -32,8 +32,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const data = await PdfService.generateInvoices(billNumber);
-    await ExcelService.createSummary(data);
+    const data = await defaultPdfService.generateInvoices(billNumber);
+    await defaultExcelService.createSummary(data);
 
     return NextResponse.json(data);
   } catch (err: unknown) {

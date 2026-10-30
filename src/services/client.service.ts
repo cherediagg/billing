@@ -1,8 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { Client } from '../models';
+import { IClientRepository } from './interfaces';
 
-const CLIENTS_FILE_PATH = path.join(process.cwd(), 'src/data/clients.json');
+export const DEFAULT_CLIENTS_FILE_PATH = path.join(process.cwd(), 'src/data/clients.json');
 
 const DEFAULT_CLIENTS: Client[] = [
   {
@@ -71,14 +72,20 @@ const DEFAULT_CLIENTS: Client[] = [
   },
 ];
 
-export class ClientService {
-  public static async getClients(): Promise<Client[]> {
+/**
+ * File-system based implementation of IClientRepository (DIP & SRP).
+ * Supports dependency injection of the file path for testability and flexibility.
+ */
+export class ClientRepository implements IClientRepository {
+  constructor(private readonly filePath: string = DEFAULT_CLIENTS_FILE_PATH) {}
+
+  public async getClients(): Promise<Client[]> {
     try {
-      if (!fs.existsSync(CLIENTS_FILE_PATH)) {
+      if (!fs.existsSync(this.filePath)) {
         await this.saveClients(DEFAULT_CLIENTS);
         return DEFAULT_CLIENTS;
       }
-      const data = await fs.promises.readFile(CLIENTS_FILE_PATH, 'utf-8');
+      const data = await fs.promises.readFile(this.filePath, 'utf-8');
       const parsed = JSON.parse(data);
       return Array.isArray(parsed) ? parsed : DEFAULT_CLIENTS;
     } catch (error) {
@@ -87,15 +94,36 @@ export class ClientService {
     }
   }
 
-  public static async saveClients(clients: Client[]): Promise<void> {
-    const dir = path.dirname(CLIENTS_FILE_PATH);
+  public async saveClients(clients: Client[]): Promise<void> {
+    const dir = path.dirname(this.filePath);
     if (!fs.existsSync(dir)) {
       await fs.promises.mkdir(dir, { recursive: true });
     }
     await fs.promises.writeFile(
-      CLIENTS_FILE_PATH,
+      this.filePath,
       JSON.stringify(clients, null, 2),
       'utf-8'
     );
+  }
+}
+
+export const defaultClientRepository = new ClientRepository();
+
+/**
+ * ClientService facade maintaining backwards compatibility while allowing DIP.
+ */
+export class ClientService {
+  private static repository: IClientRepository = defaultClientRepository;
+
+  public static setRepository(repo: IClientRepository): void {
+    this.repository = repo;
+  }
+
+  public static async getClients(): Promise<Client[]> {
+    return this.repository.getClients();
+  }
+
+  public static async saveClients(clients: Client[]): Promise<void> {
+    return this.repository.saveClients(clients);
   }
 }

@@ -5,6 +5,7 @@ import styles from './page.module.css';
 import { useGetConfig } from '../config/hooks/useGetConfig';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useUpdatePrices } from './hooks/useUpdatePrices';
+import { calculateIpcPriceIncrease } from 'src/lib/calculations';
 
 export default function Page() {
   const [showToast, setToast] = useState(false);
@@ -18,14 +19,11 @@ export default function Page() {
   }, [successMsg]);
 
   const updatedPrices = useMemo(() => {
-    if (!ipc || !clients || clients.length === 0) return [];
+    if (ipc === null || !clients || clients.length === 0) return [];
 
     return clients.map((client) => {
       const currentPrice = client.servicios[0]?.price || 0;
-      const numericPrice = typeof currentPrice === 'number' ? currentPrice : parseFloat(String(currentPrice)) || 0;
-      const newPrice = numericPrice * (1 + ipc / 100);
-
-      return parseFloat(newPrice.toFixed(2));
+      return calculateIpcPriceIncrease(currentPrice, ipc);
     });
   }, [ipc, clients]);
 
@@ -72,7 +70,7 @@ export default function Page() {
               const hasNewPrice = updatedPrices.length > 0 && ipc !== null;
               return (
                 <div
-                  key={client.id || index}
+                  key={client.id || `${client.name}-${index}`}
                   className="px-2 py-1 flex items-center justify-between text-xs border-b border-slate-700/50 last:border-0"
                 >
                   <span className="font-mono text-slate-300">{client.name}</span>
@@ -99,10 +97,10 @@ export default function Page() {
           >
             {isUpdating ? 'Actualizando precios...' : 'Actualizar precios'}
           </Button>
-
-          {showToast && <Toast message="¡Precios actualizados y guardados con éxito!" />}
         </div>
       </Suspense>
+
+      {showToast && <Toast message={successMsg} />}
     </section>
   );
 }

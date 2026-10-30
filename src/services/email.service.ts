@@ -1,30 +1,38 @@
 import fs from 'fs';
 import path from 'path';
-import nodemailer from 'nodemailer';
+import nodemailer, { Transporter } from 'nodemailer';
 import { APP_CONFIG } from '../lib/config';
 import { getMonthYear, getSpanishMonthName } from '../lib/dates';
-import { ClientService } from './client.service';
 import { EmailRecipient, FailedEmail, EmailSendingResult } from '../models';
+import { IEmailService, IClientRepository } from './interfaces';
+import { defaultClientRepository } from './client.service';
 
-export class EmailService {
-  private static getTransporter() {
-    return nodemailer.createTransport({
-      host: APP_CONFIG.smtp.host,
-      port: APP_CONFIG.smtp.port,
-      secure: APP_CONFIG.smtp.secure,
-      auth: {
-        user: APP_CONFIG.smtp.user,
-        pass: APP_CONFIG.smtp.pass,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-  }
+/**
+ * Implementation of IEmailService (SRP & DIP).
+ * Allows custom transporter provider, client repo, and directory injection.
+ */
+export class EmailServiceImpl implements IEmailService {
+  constructor(
+    private readonly clientRepo: IClientRepository = defaultClientRepository,
+    private readonly getTransporterFn: () => Transporter = () =>
+      nodemailer.createTransport({
+        host: APP_CONFIG.smtp.host,
+        port: APP_CONFIG.smtp.port,
+        secure: APP_CONFIG.smtp.secure,
+        auth: {
+          user: APP_CONFIG.smtp.user,
+          pass: APP_CONFIG.smtp.pass,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      }),
+    private readonly baseDir: string = path.join(process.cwd(), 'pdfs')
+  ) {}
 
-  public static async getPendingEmails(): Promise<EmailRecipient[]> {
+  public async getPendingEmails(): Promise<EmailRecipient[]> {
     const { month } = getMonthYear();
-    const folderPath = path.join(process.cwd(), 'pdfs', month);
+    const folderPath = path.join(this.baseDir, month);
 
     if (!fs.existsSync(folderPath)) {
       return [];
@@ -38,7 +46,7 @@ export class EmailService {
       return [];
     }
 
-    const clients = await ClientService.getClients();
+    const clients = await this.clientRepo.getClients();
     const emailsToSend: EmailRecipient[] = [];
 
     for (const file of files) {
@@ -58,12 +66,10 @@ export class EmailService {
     return emailsToSend;
   }
 
-  public static async sendInvoices(
-    recipients: EmailRecipient[]
-  ): Promise<EmailSendingResult> {
+  public async sendInvoices(recipients: EmailRecipient[]): Promise<EmailSendingResult> {
     const { month } = getMonthYear();
-    const folderPath = path.join(process.cwd(), 'pdfs', month);
-    const transporter = this.getTransporter();
+    const folderPath = path.join(this.baseDir, month);
+    const transporter = this.getTransporterFn();
     const failedEmails: FailedEmail[] = [];
     const currentMonthName = getSpanishMonthName();
 
@@ -106,17 +112,35 @@ export class EmailService {
     }
 
     if (failedEmails.length > 0) {
-      const reason = failedEmails[0]?.error
-        ? String(failedEmails[0].error)
-        : 'Error durante el envío de algunos correos.';
       return {
         failedEmails,
-        reason,
+        reason: `${failedEmails.length} de ${recipients.length} correos no se pudieron enviar.`,
       };
     }
 
     return {
       message: `${recipients.length} emails enviados correctamente`,
     };
+  }
+}
+
+export const defaultEmailService = new EmailServiceImpl();
+
+/**
+ * EmailService facade for backward compatibility.
+ */
+export class EmailService {
+  private static instance: IEmailService = defaultEmailService;
+
+  public static setInstance(service: IEmailService): void {
+    this.instance = service;
+  }
+
+  public static async getPendingEmails(): Promise<EmailRecipient[]> {
+    return this.instance.getPendingEmails();
+  }
+
+  public static async sendInvoices(recipients: EmailRecipient[]): Promise<EmailSendingResult> {
+    return this.instance.sendInvoices(recipients);
   }
 }

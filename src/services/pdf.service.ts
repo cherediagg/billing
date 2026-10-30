@@ -3,13 +3,19 @@ import path from 'path';
 import { PDFDocument, rgb } from 'pdf-lib';
 import { getLastMonthYear, getMonthYear } from '../lib/dates';
 import { BillingSummary, GeneratedInvoice } from '../models';
+import { IPdfService } from './interfaces';
 
-export class PdfService {
-  private static getPdfsBaseDir(): string {
-    return path.join(process.cwd(), 'pdfs');
+/**
+ * Implementation of IPdfService handling PDF invoice modifications (SRP & DIP).
+ */
+export class PdfServiceImpl implements IPdfService {
+  constructor(private readonly baseDir: string = path.join(process.cwd(), 'pdfs')) {}
+
+  private getPdfsBaseDir(): string {
+    return this.baseDir;
   }
 
-  public static getSourceDirectory(): { dirPath: string; month: string } {
+  public getSourceDirectory(): { dirPath: string; month: string } {
     const { month } = getLastMonthYear();
     const sourceDir = path.join(this.getPdfsBaseDir(), month);
 
@@ -33,7 +39,7 @@ export class PdfService {
     return { dirPath: sourceDir, month };
   }
 
-  public static getSourceFiles(dirPath: string): string[] {
+  public getSourceFiles(dirPath: string): string[] {
     if (!fs.existsSync(dirPath)) {
       return [];
     }
@@ -44,7 +50,7 @@ export class PdfService {
       .sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
   }
 
-  public static getLastInvoiceId(files: string[]): number {
+  public getLastInvoiceId(files: string[]): number {
     if (files.length === 0) return 0;
     const regex = /\d{4}F(\d+)/i;
     const filename = files[files.length - 1];
@@ -52,7 +58,7 @@ export class PdfService {
     return match ? parseInt(match[1], 10) : 0;
   }
 
-  public static getBillingSummary(): { summary: BillingSummary | null; error?: string } {
+  public getBillingSummary(): { summary: BillingSummary | null; error?: string } {
     const { dirPath, month } = this.getSourceDirectory();
 
     if (!fs.existsSync(dirPath)) {
@@ -81,7 +87,7 @@ export class PdfService {
     };
   }
 
-  public static async generateInvoices(startingBillNumber: number): Promise<GeneratedInvoice[]> {
+  public async generateInvoices(startingBillNumber: number): Promise<GeneratedInvoice[]> {
     const { dirPath } = this.getSourceDirectory();
     const files = this.getSourceFiles(dirPath);
 
@@ -113,7 +119,7 @@ export class PdfService {
     return generated;
   }
 
-  private static async updatePdfFile(
+  private async updatePdfFile(
     sourcePath: string,
     targetPath: string,
     invoiceNumber: number,
@@ -178,5 +184,38 @@ export class PdfService {
 
     const updatedPdfBytes = await pdfDoc.save();
     await fs.promises.writeFile(targetPath, updatedPdfBytes);
+  }
+}
+
+export const defaultPdfService = new PdfServiceImpl();
+
+/**
+ * PdfService facade for backward compatibility and static consumption.
+ */
+export class PdfService {
+  private static instance: IPdfService = defaultPdfService;
+
+  public static setInstance(service: IPdfService): void {
+    this.instance = service;
+  }
+
+  public static getSourceDirectory(): { dirPath: string; month: string } {
+    return this.instance.getSourceDirectory();
+  }
+
+  public static getSourceFiles(dirPath: string): string[] {
+    return this.instance.getSourceFiles(dirPath);
+  }
+
+  public static getLastInvoiceId(files: string[]): number {
+    return this.instance.getLastInvoiceId(files);
+  }
+
+  public static getBillingSummary(): { summary: BillingSummary | null; error?: string } {
+    return this.instance.getBillingSummary();
+  }
+
+  public static async generateInvoices(startingBillNumber: number): Promise<GeneratedInvoice[]> {
+    return this.instance.generateInvoices(startingBillNumber);
   }
 }
