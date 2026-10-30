@@ -1,0 +1,4 @@
+.page {
+    @apply max-w-4xl w-full bg-white p-6 rounded-lg shadow-lg min-h-[650px];
+}
+

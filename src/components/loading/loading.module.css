@@ -1,0 +1,39 @@
+.loading {
+    font-size: 20px;
+    color: #007BFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-weight: bold;
+    text-align: center;
+    min-height: 50%;
+    align-content: center;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background-color: #007BFF;
+    border-radius: 50%;
+    animation: bounce 1.5s infinite;
+}
+
+.dot:nth-child(1) {
+    animation-delay: 0s;
+}
+.dot:nth-child(2) {
+    animation-delay: 0.3s;
+}
+.dot:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-8px);
+    }
+}

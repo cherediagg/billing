@@ -1,0 +1,7 @@
+.error{
+    @apply text-red-800 text-center bg-red-100 px-4 pt-2 pb-6;
+}
+
+.close{
+    @apply text-right text-4xl pr-1 mb-2 cursor-pointer hover:text-red-400;
+}

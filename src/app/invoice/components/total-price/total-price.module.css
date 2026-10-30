@@ -1,0 +1,22 @@
+.footerTable {
+    background-color: white;
+    width: 50%;
+    margin: 0 0 0 auto;
+    border-collapse: collapse;
+    margin-top: 10px;
+    color: black;
+  }
+  
+  .footerTable th,
+  .footerTable td {
+    padding: 6px;
+    text-align: right;
+    background-color: white;
+    color: black;
+  }
+  
+  .totaltr td,
+  .totaltr th {
+    background-color: #e6f7ff;
+    font-weight: bold;
+  }

@@ -1,0 +1,16 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 15mm;
+  }
+  
+  .logo img {
+    max-width: 80mm;
+  }
+  
+  .companyDetails {
+    text-align: right;
+    max-width: 120mm;
+  }

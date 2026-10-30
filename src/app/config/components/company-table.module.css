@@ -1,0 +1,73 @@
+.company-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem 0;
+  }
+  
+  .company-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+  }
+  
+  .company-header {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .company-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .detail {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .detail label {
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+    color: #555;
+  }
+  
+  .detail input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background-color: #fff;
+  }
+  
+  .detail input:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  .actions {
+    margin-top: 1rem;
+  }
+  
+  .delete-button {
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .delete-button:hover {
+    background-color: #d9363e;
+  }
+  

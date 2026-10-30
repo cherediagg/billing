@@ -1,0 +1,45 @@
+.inputWrapper {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .label {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .requiredStar {
+    color: #e53e3e;
+    margin-left: 0.25rem;
+  }
+  
+  .input {
+    padding: 0.5rem;
+    font-size: .9rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+  }
+  
+  .errorInput {
+    border-color: #e53e3e;
+  }
+  
+  .errorInput:focus {
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.3);
+  }
+  
+  .errorMessage {
+    color: #e53e3e;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
+  
+  

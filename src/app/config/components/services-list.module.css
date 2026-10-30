@@ -1,0 +1,18 @@
+
+  
+  .services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .service-item {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .service-item input {
+    flex: 1;
+  }
+  
+  

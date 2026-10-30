@@ -1,0 +1,15 @@
+.conceptsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1mm;
+    background-color: #e6f7ff;
+  }
+  
+  .conceptsTable th {
+    border: none;
+    background-color: #4093eb;
+    color: white;
+    font-size: 13px;
+    padding: .3rem;
+    text-align: left;
+  }

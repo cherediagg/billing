@@ -1,0 +1,10 @@
+
+.button-container {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.page {
+    @apply max-w-4xl w-full bg-white p-6 rounded-lg shadow-lg;
+}
