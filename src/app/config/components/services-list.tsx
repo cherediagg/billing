@@ -1,7 +1,7 @@
 import styles from './services-list.module.css';
 
 import { useCallback } from 'react';
-import { Button } from 'src/components';
+import Button from 'src/components/button/button';
 import { Service } from 'src/models';
 import { v4 as uuidv4 } from 'uuid';
 

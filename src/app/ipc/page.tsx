@@ -1,6 +1,12 @@
 'use client';
 
-import { Button, ConsoleFeed, Error as ErrorAlert, Loading, TextInput, Title, Toast } from 'src/components';
+import Button from 'src/components/button/button';
+import ConsoleFeed from 'src/components/console-feedback/console-feed';
+import ErrorAlert from 'src/components/error/error';
+import Loading from 'src/components/loading/loading';
+import TextInput from 'src/components/input-text/text-input';
+import Title from 'src/components/title/title';
+import Toast from 'src/components/toast/toast';
 import styles from './page.module.css';
 import { useGetConfig } from '../config/hooks/useGetConfig';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';

@@ -6,15 +6,35 @@ import UseSendEmails from './hooks/useSendEmails'
 jest.mock('./hooks/useGetEmails')
 jest.mock('./hooks/useSendEmails')
 
-jest.mock('src/components', () => ({
+jest.mock('src/components/button/button', () => ({
+  __esModule: true,
+  default: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
+    <button onClick={onClick}>{children}</button>
+  ),
   Button: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
     <button onClick={onClick}>{children}</button>
   ),
+}));
+jest.mock('src/components/console-feedback/console-feed', () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   ConsoleFeed: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+jest.mock('src/components/error/error', () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Error: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+jest.mock('src/components/loading/loading', () => ({
+  __esModule: true,
+  default: () => <div>Loading...</div>,
   Loading: () => <div>Loading...</div>,
+}));
+jest.mock('src/components/title/title', () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => <h1>{children}</h1>,
   Title: ({ children }: { children: React.ReactNode }) => <h1>{children}</h1>,
-}))
+}));
 
 describe('Page Component', () => {
   const mockEmails = [

@@ -1,6 +1,8 @@
 'use client';
 
-import { Loading, PrintBtn, Error as ErrorAlert } from 'src/components';
+import Loading from 'src/components/loading/loading';
+import PrintBtn from 'src/components/print-button/print-btn';
+import ErrorAlert from 'src/components/error/error';
 import ClientSearch from '../client-search/clientSearch';
 import styles from './invoice-content.module.css';
 import InvoiceHeader from '../invoice-header/invoice-header';

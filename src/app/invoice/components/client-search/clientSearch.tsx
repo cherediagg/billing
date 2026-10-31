@@ -2,8 +2,8 @@
 
 import { Client } from 'src/models';
 import styles from './clientSearch.module.css';
-import { useState, useEffect, useRef } from 'react';
-import { SearchInput } from 'src/components';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import SearchInput from 'src/components/search-input/search-input';
 
 export interface ClientSearchProps {
   clients?: Client[];
@@ -19,36 +19,37 @@ export function ClientSearch({
   selectedClient,
 }: ClientSearchProps) {
   const [searchTerm, setSearchTerm] = useState(selectedClient?.name || '');
-  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (selectedClient?.name) {
       setSearchTerm(selectedClient.name);
+      setIsDismissed(false);
     }
   }, [selectedClient?.name]);
 
-  useEffect(() => {
-    if (searchTerm.length > 1 && clients.length > 0) {
-      const filtered = clients.filter(
-        (client) =>
-          client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          client.taxId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          client.address.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredClients(filtered);
-      setIsOpen(filtered.length > 0 && searchTerm !== selectedClient?.name);
-    } else {
-      setFilteredClients((prev) => (prev.length > 0 ? [] : prev));
-      setIsOpen(false);
+  const filteredClients = useMemo(() => {
+    if (searchTerm.length <= 1 || !clients || clients.length === 0) {
+      return EMPTY_CLIENTS;
     }
-  }, [searchTerm, clients, selectedClient?.name]);
+    const lowerQuery = searchTerm.toLowerCase();
+    return clients.filter(
+      (client) =>
+        Boolean(
+          (client.name && client.name.toLowerCase().includes(lowerQuery)) ||
+          (client.taxId && client.taxId.toLowerCase().includes(lowerQuery)) ||
+          (client.address && client.address.toLowerCase().includes(lowerQuery))
+        )
+    );
+  }, [clients, searchTerm]);
+
+  const isOpen = !isDismissed && filteredClients.length > 0 && searchTerm !== selectedClient?.name;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        setIsDismissed(true);
       }
     }
 
@@ -63,18 +64,23 @@ export function ClientSearch({
       onSelectClient(client);
     }
     setSearchTerm(client.name);
-    setIsOpen(false);
+    setIsDismissed(true);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setIsDismissed(false);
   };
 
   return (
     <div className={`${styles.clientSearch} relative w-full max-w-md`} ref={searchRef}>
       <SearchInput
         value={searchTerm}
-        onSearch={(value) => setSearchTerm(value)}
+        onSearch={handleSearchChange}
         placeholder="Buscar cliente por nombre o NIF..."
       />
 
-      {isOpen && filteredClients.length > 0 && (
+      {isOpen && (
         <ul className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-auto divide-y divide-slate-100 dark:divide-slate-700">
           {filteredClients.map((client) => (
             <li

@@ -58,13 +58,15 @@ export class PdfService {
       .sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
   }
 
+  private static readonly INVOICE_ID_REGEX = /\d{4}F(\d+)/i;
+  private static readonly INVOICE_FILENAME_PREFIX_REGEX = /^(\d{4})F\d+_/i;
+
   public static getLastInvoiceId(files: string[]): number {
     if (!files || files.length === 0) return 0;
-    const regex = /\d{4}F(\d+)/i;
     let maxId = 0;
 
     for (const filename of files) {
-      const match = filename.match(regex);
+      const match = filename.match(this.INVOICE_ID_REGEX);
       if (match) {
         const id = parseInt(match[1], 10);
         if (!isNaN(id) && id > maxId) {
@@ -126,7 +128,7 @@ export class PdfService {
     // Precalculate file mapping to guarantee deterministic numbering
     const invoiceItems = files.map((file, index) => {
       const id = startingBillNumber + index;
-      const newFileName = file.replace(/^(\d{4})F\d+_/i, `${currentMonthYear.year}F${id}_`);
+      const newFileName = file.replace(this.INVOICE_FILENAME_PREFIX_REGEX, `${currentMonthYear.year}F${id}_`);
       const sourceFilePath = path.join(dirPath, file);
       const targetFilePath = path.join(outputDir, newFileName);
       return {
