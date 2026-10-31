@@ -83,7 +83,7 @@ export default function Page() {
         <div className="error-failed-emails">
           Han fallado los siguientes emails:
           {errorSending?.failedEmails.map((file, index) => (
-            <div key={index} className="failed-email">
+            <div key={`${file.file}-${file.email}-${index}`} className="failed-email">
               {file.file} - {file.email}
             </div>
           ))}
