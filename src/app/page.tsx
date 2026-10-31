@@ -13,11 +13,14 @@ export default function Index() {
   const { data, loading, error } = useFetchBilling();
   const { files, isLoading, errorGenerate, processFiles } = useGenerateBills(idBill);
 
+  const [hasInitializedId, setHasInitializedId] = useState(false);
+
   useEffect(() => {
-    if (data?.nextId) {
+    if (data?.nextId && !hasInitializedId) {
       setIdBill(data.nextId);
+      setHasInitializedId(true);
     }
-  }, [data]);
+  }, [data?.nextId, hasInitializedId]);
 
   useEffect(() => {
     if (files.length > 0) {
@@ -61,8 +64,11 @@ export default function Index() {
             <div className="text-emerald-400 mb-2">
               Se van a generar <b>{data.total} facturas</b>. Pulsa el botón para continuar...
             </div>
-            {files.map((file, index) => (
-              <div key={index} className="px-1 py-0.5 text-emerald-300 flex items-center gap-2">
+            {files.map((file) => (
+              <div
+                key={file.id ?? file.name}
+                className="px-1 py-0.5 text-emerald-300 flex items-center gap-2"
+              >
                 <span>✅</span>
                 <span>{file.name}</span>
                 <span className="text-xs text-emerald-500">({file.id})</span>

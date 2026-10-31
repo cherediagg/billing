@@ -1,9 +1,15 @@
+import type { Metadata, Viewport } from 'next';
 import Navbar from 'src/components/nav/navbar';
 import './global.css';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'eBilling - Sistema de Facturación y Clientes',
   description: 'Gestión automatizada de facturas, generación de PDF, envío de correos y actualización por IPC',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 const menuItems = [

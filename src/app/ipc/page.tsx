@@ -55,6 +55,7 @@ export default function Page() {
           <TextInput
             type="number"
             step="0.01"
+            inputMode="decimal"
             label="Porcentaje de subida del IPC (%)"
             id="id-ipc-input"
             placeholder="Ejemplo: 3.5"
@@ -70,9 +71,10 @@ export default function Page() {
             {clients.map((client, index) => {
               const currentPrice = client.servicios[0]?.price || 0;
               const hasNewPrice = updatedPrices.length > 0 && ipc !== null;
+              const clientKey = client.id || client.taxId || client.name || `client-${index}`;
               return (
                 <div
-                  key={client.id || index}
+                  key={clientKey}
                   className="px-2 py-1 flex items-center justify-between text-xs border-b border-slate-700/50 last:border-0"
                 >
                   <span className="font-mono text-slate-300">{client.name}</span>

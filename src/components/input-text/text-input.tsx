@@ -35,6 +35,7 @@ export function TextInput({
 
   const displayError = error || localError;
   const dynamicPlaceholder = placeholder || `Enter ${label.toLowerCase()}`;
+  const inputMode = props.inputMode || (props.type === 'number' ? (props.step ? 'decimal' : 'numeric') : undefined);
 
   return (
     <div className={styles.inputWrapper}>
@@ -44,6 +45,7 @@ export function TextInput({
       </label>
       <input
         id={id}
+        inputMode={inputMode}
         className={`${styles.input} ${displayError ? styles.errorInput : ''} ${className}`}
         placeholder={dynamicPlaceholder}
         aria-invalid={!!displayError}
