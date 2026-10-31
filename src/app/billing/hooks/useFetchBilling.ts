@@ -25,8 +25,9 @@ export function useFetchBilling(): UseFetchBillingResult {
         throw new Error(result.error || 'Error al obtener datos de facturación');
       }
       setData(result);
-    } catch (err: any) {
-      setError(err?.message || 'Error de conexión');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error de conexión';
+      setError(message);
     } finally {
       setLoading(false);
     }

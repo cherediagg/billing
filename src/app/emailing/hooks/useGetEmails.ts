@@ -27,8 +27,9 @@ export function useGetEmails(): UseGetEmailsResult {
       }
       const result = await response.json();
       setData(Array.isArray(result) ? result : []);
-    } catch (err: any) {
-      setError(err?.message || 'Error al conectar con el servidor');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al conectar con el servidor';
+      setError(message);
     } finally {
       setLoading(false);
     }

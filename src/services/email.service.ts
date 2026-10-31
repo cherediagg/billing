@@ -94,12 +94,13 @@ export class EmailService {
 
       try {
         await transporter.sendMail(mailOptions);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMsg = error instanceof Error ? error.message : 'Error desconocido al enviar el correo.';
         console.error(`Error enviando correo a ${email} (${file}):`, error);
         failedEmails.push({
           email,
           file,
-          error: error?.message || 'Error desconocido al enviar el correo.',
+          error: errorMsg,
         });
       }
     }
