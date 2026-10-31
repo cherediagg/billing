@@ -41,13 +41,20 @@ export class EmailService {
     const clients = await ClientService.getClients();
     const emailsToSend: EmailRecipient[] = [];
 
+    const preparedClients = clients
+      .filter((client) => client.name && client.email)
+      .map((client) => ({
+        email: client.email,
+        trimmedLowerName: client.name.toLowerCase().trim(),
+      }));
+
     for (const file of files) {
       const normalizedFileName = file.toLowerCase();
-      const matchedClient = clients.find((client) =>
-        normalizedFileName.includes(client.name.toLowerCase().trim())
+      const matchedClient = preparedClients.find((client) =>
+        normalizedFileName.includes(client.trimmedLowerName)
       );
 
-      if (matchedClient && matchedClient.email) {
+      if (matchedClient) {
         emailsToSend.push({
           email: matchedClient.email,
           file,

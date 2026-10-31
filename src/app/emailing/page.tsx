@@ -3,8 +3,13 @@
 import styles from './page.module.css';
 import { useGetEmails, Emails } from './hooks/useGetEmails';
 import { useSendEmails } from './hooks/useSendEmails';
-import { useEffect, useState } from 'react';
-import { Button, ConsoleFeed, Error as ErrorAlert, Loading, Title, Toast } from 'src/components';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Button from 'src/components/button/button';
+import ConsoleFeed from 'src/components/console-feedback/console-feed';
+import ErrorAlert from 'src/components/error/error';
+import Loading from 'src/components/loading/loading';
+import Title from 'src/components/title/title';
+import Toast from 'src/components/toast/toast';
 
 export default function Page() {
   const [emailsToSend, setEmailsToSend] = useState<Emails[]>([]);
@@ -22,18 +27,19 @@ export default function Page() {
     if (files) setShowToast(true);
   }, [files]);
 
-  const handleCheckboxChange = (email: Emails, checked: boolean) => {
-    const updatedEmails = [...emailsToSend];
-    if (checked) {
-      updatedEmails.push(email);
-    } else {
-      const index = updatedEmails.findIndex((e) => e.file === email.file);
-      if (index !== -1) {
-        updatedEmails.splice(index, 1);
+  const selectedFileSet = useMemo(
+    () => new Set(emailsToSend.map((e) => e.file)),
+    [emailsToSend]
+  );
+
+  const handleCheckboxChange = useCallback((email: Emails, checked: boolean) => {
+    setEmailsToSend((prevEmails) => {
+      if (checked) {
+        return [...prevEmails, email];
       }
-    }
-    setEmailsToSend(updatedEmails);
-  };
+      return prevEmails.filter((e) => e.file !== email.file);
+    });
+  }, []);
 
   const renderPreResult = data && (
     <div className="email-list space-y-4">
@@ -41,22 +47,25 @@ export default function Page() {
         <div className="email-summary mb-2">
           Se van a enviar <b className="email-count">{emailsToSend.length}</b> emails:
         </div>
-        {data.map((email) => (
-          <div key={email.file} className="email-item mb-1 flex items-center justify-between text-sm">
-            <label className="inline-flex items-center gap-2 cursor-pointer flex-1">
-              <input
-                className="email-checkbox w-4 h-4 accent-emerald-500 rounded cursor-pointer"
-                type="checkbox"
-                checked={emailsToSend.some((e) => e.file === email.file)}
-                onChange={(e) => handleCheckboxChange(email, e.target.checked)}
-              />
-              <span className="email-file font-mono text-xs text-slate-300">{email.file}</span>
-            </label>
-            <span className="email-address text-emerald-400 text-xs shrink-0 ml-2">
-              {email.email} 📧
-            </span>
-          </div>
-        ))}
+        {data.map((email) => {
+          const isSelected = selectedFileSet.has(email.file);
+          return (
+            <div key={email.file} className="email-item mb-1 flex items-center justify-between text-sm">
+              <label className="inline-flex items-center gap-2 cursor-pointer flex-1">
+                <input
+                  className="email-checkbox w-4 h-4 accent-emerald-500 rounded cursor-pointer"
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={(e) => handleCheckboxChange(email, e.target.checked)}
+                />
+                <span className="email-file font-mono text-xs text-slate-300">{email.file}</span>
+              </label>
+              <span className="email-address text-emerald-400 text-xs shrink-0 ml-2">
+                {email.email} 📧
+              </span>
+            </div>
+          );
+        })}
       </ConsoleFeed>
 
       <Button

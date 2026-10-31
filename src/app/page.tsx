@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react';
 import styles from './page.module.scss';
 import { useFetchBilling } from './billing/hooks/useFetchBilling';
 import { useGenerateBills } from './billing/hooks/useGenerateBills';
-import { Title, Button, ConsoleFeed, Error as ErrorAlert, Loading, TextInput, Toast } from 'src/components';
+import Title from 'src/components/title/title';
+import Button from 'src/components/button/button';
+import ConsoleFeed from 'src/components/console-feedback/console-feed';
+import ErrorAlert from 'src/components/error/error';
+import Loading from 'src/components/loading/loading';
+import TextInput from 'src/components/input-text/text-input';
+import Toast from 'src/components/toast/toast';
 
 export default function Index() {
   const [idBill, setIdBill] = useState<number>(0);

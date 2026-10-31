@@ -2,7 +2,8 @@ import { Client, Service } from 'src/models';
 import styles from './company-table.module.css';
 import ServicesList from './services-list';
 import { useState } from 'react';
-import { Button, TextInput } from 'src/components';
+import Button from 'src/components/button/button';
+import TextInput from 'src/components/input-text/text-input';
 
 interface CompanyListProps {
   companies: Client[];
@@ -15,13 +16,13 @@ export function CompanyList({ companies, updateCompany, deleteCompany }: Company
 
   const toggleVisibility = (id: string) => {
     setVisibleCompanies((prevVisibleCompanies) => {
-      const newVisibleCompanies = new Set(prevVisibleCompanies);
-      if (newVisibleCompanies.has(id)) {
-        newVisibleCompanies.delete(id);
+      const nextVisible = new Set(prevVisibleCompanies);
+      if (nextVisible.has(id)) {
+        nextVisible.delete(id);
       } else {
-        newVisibleCompanies.add(id);
+        nextVisible.add(id);
       }
-      return newVisibleCompanies;
+      return nextVisible;
     });
   };
 

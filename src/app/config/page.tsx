@@ -7,7 +7,12 @@ import { useSaveToFile } from './hooks/useSaveToFile';
 import { Client, Service } from 'src/models';
 import { v4 as uuidv4 } from 'uuid';
 import CompanyTable from './components/company-table';
-import { Button, Error as ErrorAlert, Loading, SearchInput, Title, Toast } from 'src/components';
+import Button from 'src/components/button/button';
+import ErrorAlert from 'src/components/error/error';
+import Loading from 'src/components/loading/loading';
+import SearchInput from 'src/components/search-input/search-input';
+import Title from 'src/components/title/title';
+import Toast from 'src/components/toast/toast';
 
 export default function ConfigPage() {
   const { clients, loading, error } = useGetConfig();
