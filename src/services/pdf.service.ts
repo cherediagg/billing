@@ -11,26 +11,40 @@ export class PdfService {
 
   public static getSourceDirectory(): { dirPath: string; month: string } {
     const { month } = getLastMonthYear();
-    const sourceDir = path.join(this.getPdfsBaseDir(), month);
+    const baseDir = this.getPdfsBaseDir();
+    const paddedMonth = month.padStart(2, '0');
+    const unpaddedMonth = String(parseInt(month, 10));
 
-    if (fs.existsSync(sourceDir)) {
-      return { dirPath: sourceDir, month };
+    // Try canonical month format, padded or unpadded
+    const candidateDirs = [month, paddedMonth, unpaddedMonth];
+    for (const candidate of candidateDirs) {
+      const sourceDir = path.join(baseDir, candidate);
+      if (fs.existsSync(sourceDir)) {
+        return { dirPath: sourceDir, month: candidate };
+      }
     }
 
-    // Fallback: search any existing directory in pdfs/ if default last month is missing
-    const baseDir = this.getPdfsBaseDir();
+    // Fallback: search existing directories in pdfs/ ordered descending by month number
     if (fs.existsSync(baseDir)) {
       const subdirs = fs
         .readdirSync(baseDir, { withFileTypes: true })
         .filter((d) => d.isDirectory())
-        .map((d) => d.name);
+        .map((d) => d.name)
+        .sort((a, b) => {
+          const numA = parseInt(a, 10);
+          const numB = parseInt(b, 10);
+          if (!isNaN(numA) && !isNaN(numB)) {
+            return numB - numA;
+          }
+          return b.localeCompare(a, 'es', { numeric: true });
+        });
 
       if (subdirs.length > 0) {
         return { dirPath: path.join(baseDir, subdirs[0]), month: subdirs[0] };
       }
     }
 
-    return { dirPath: sourceDir, month };
+    return { dirPath: path.join(baseDir, month), month };
   }
 
   public static getSourceFiles(dirPath: string): string[] {
@@ -45,11 +59,21 @@ export class PdfService {
   }
 
   public static getLastInvoiceId(files: string[]): number {
-    if (files.length === 0) return 0;
+    if (!files || files.length === 0) return 0;
     const regex = /\d{4}F(\d+)/i;
-    const filename = files[files.length - 1];
-    const match = filename.match(regex);
-    return match ? parseInt(match[1], 10) : 0;
+    let maxId = 0;
+
+    for (const filename of files) {
+      const match = filename.match(regex);
+      if (match) {
+        const id = parseInt(match[1], 10);
+        if (!isNaN(id) && id > maxId) {
+          maxId = id;
+        }
+      }
+    }
+
+    return maxId;
   }
 
   public static getBillingSummary(): { summary: BillingSummary | null; error?: string } {
@@ -81,7 +105,10 @@ export class PdfService {
     };
   }
 
-  public static async generateInvoices(startingBillNumber: number): Promise<GeneratedInvoice[]> {
+  public static async generateInvoices(
+    startingBillNumber: number,
+    concurrency = 5
+  ): Promise<GeneratedInvoice[]> {
     const { dirPath } = this.getSourceDirectory();
     const files = this.getSourceFiles(dirPath);
 
@@ -96,21 +123,32 @@ export class PdfService {
       await fs.promises.mkdir(outputDir, { recursive: true });
     }
 
-    let id = startingBillNumber;
-    const generated: GeneratedInvoice[] = [];
-
-    for (const file of files) {
-      const sourceFilePath = path.join(dirPath, file);
+    // Precalculate file mapping to guarantee deterministic numbering
+    const invoiceItems = files.map((file, index) => {
+      const id = startingBillNumber + index;
       const newFileName = file.replace(/^(\d{4})F\d+_/i, `${currentMonthYear.year}F${id}_`);
+      const sourceFilePath = path.join(dirPath, file);
       const targetFilePath = path.join(outputDir, newFileName);
+      return {
+        id,
+        name: newFileName,
+        sourceFilePath,
+        targetFilePath,
+      };
+    });
 
-      await this.updatePdfFile(sourceFilePath, targetFilePath, id, currentMonthYear);
-
-      generated.push({ name: newFileName, id });
-      id += 1;
+    // Process concurrently in chunks to optimize I/O and CPU without overloading memory
+    const chunkSize = Math.max(1, concurrency);
+    for (let i = 0; i < invoiceItems.length; i += chunkSize) {
+      const chunk = invoiceItems.slice(i, i + chunkSize);
+      await Promise.all(
+        chunk.map((item) =>
+          this.updatePdfFile(item.sourceFilePath, item.targetFilePath, item.id, currentMonthYear)
+        )
+      );
     }
 
-    return generated;
+    return invoiceItems.map((item) => ({ name: item.name, id: item.id }));
   }
 
   private static async updatePdfFile(
